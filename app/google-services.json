@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "619100328039",
+    "project_id": "recky-6b8bf",
+    "storage_bucket": "recky-6b8bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:619100328039:android:2cb2f9bb971d3b0ffe04c2",
+        "android_client_info": {
+          "package_name": "software.lunchtable.recky"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "619100328039-4u2kgnddr3649o5dil3fql15i4maaajq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhtZFQn024wfZnDkxb4jG9BjgUzaVqrDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "619100328039-1np7mpqi5oakmaf8mh5rq1jbt3c99hp1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "619100328039-d4d5377pjs3trlb55go773idticcf640.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "software.lunchtable.Recky"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
