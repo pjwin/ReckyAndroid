@@ -79,8 +79,8 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="C:\Users\winte\IdeaProjects\Recky\app\src\main\res\Recky.png" />
-                                                <entry key="scalingPercent" value="71" />
+                                                <entry key="imagePath" value="C:\Users\winte\AndroidStudioProjects\Recky\app\src\main\res\Recky.png" />
+                                                <entry key="scalingPercent" value="70" />
                                               </map>
                                             </option>
                                           </PersistentState>
