@@ -1,47 +1,42 @@
 package software.lunchtable.recky
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun HomeScreen(onLogout: () -> Unit) {
+fun HomeScreen(
+    onProfileClick: () -> Unit
+) {
     val user = FirebaseAuth.getInstance().currentUser
     val email = user?.email ?: "Unknown user"
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(WindowInsets.systemBars.asPaddingValues()) // 👈 Add this line
     ) {
-        Text(
-            text = "Welcome to Recky!",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        HomeHeader(userEmail = email, onProfileClick = onProfileClick)
 
+        Divider(
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Signed in as: $email",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onLogout,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error
-            )
-        ) {
-            Text("Log Out", color = MaterialTheme.colorScheme.onError)
-        }
+        // ...rest of your content
     }
+
+
 }

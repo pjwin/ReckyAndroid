@@ -21,19 +21,19 @@ class MainActivity : ComponentActivity() {
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
-    private var setLoggedIn: ((Boolean) -> Unit)? = null // 👈 will set this later from Compose
+    enum class Screen { Login, Home, Profile }
+
+    private var setScreen: ((Screen) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ✅ Set up Google Sign-In options
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // ✅ Register launcher
         googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     .addOnCompleteListener { firebaseResult ->
                         if (firebaseResult.isSuccessful) {
                             Log.d("GoogleLogin", "Firebase auth successful")
-                            setLoggedIn?.invoke(true) // ✅ update Compose state
+                            setScreen?.invoke(Screen.Home)
                         } else {
                             Log.e("GoogleLogin", "Firebase auth failed", firebaseResult.exception)
                         }
@@ -53,27 +53,39 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // ✅ Compose UI
         setContent {
             ReckyTheme {
-                var loggedIn by remember { mutableStateOf(auth.currentUser != null) }
-                setLoggedIn = { loggedIn = it } // 👈 expose state update to callback
-
-                if (loggedIn) {
-                    HomeScreen(
-                        onLogout = {
-                            auth.signOut()
-                            googleSignInClient.signOut().addOnCompleteListener {
-                                loggedIn = false
-                            }
-                        }
+                var currentScreen by remember {
+                    mutableStateOf(
+                        if (auth.currentUser != null) Screen.Home else Screen.Login
                     )
-                } else {
-                    LoginScreen(
-                        onLoginSuccess = { loggedIn = true },
+                }
+                setScreen = { screen -> currentScreen = screen }
+
+                when (currentScreen) {
+                    Screen.Login -> LoginScreen(
+                        onLoginSuccess = { currentScreen = Screen.Home },
                         onGoogleSignIn = {
                             val intent = googleSignInClient.signInIntent
                             googleSignInLauncher.launch(intent)
+                        }
+                    )
+
+                    Screen.Home -> HomeScreen(
+                        onProfileClick = {
+                            currentScreen = Screen.Profile
+                        }
+                    )
+
+                    Screen.Profile -> ProfileScreen(
+                        onSignOut = {
+                            auth.signOut()
+                            googleSignInClient.signOut().addOnCompleteListener {
+                                currentScreen = Screen.Login
+                            }
+                        },
+                        onBack = {
+                            currentScreen = Screen.Home
                         }
                     )
                 }
