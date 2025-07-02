@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "619100328039-ii4slif0tvsjh936ll3kr1e6hr3ib3qu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "software.lunchtable.recky",
+            "certificate_hash": "e9687d28516b91939d66ecacf024e3e4daee8862"
+          }
+        },
+        {
           "client_id": "619100328039-4u2kgnddr3649o5dil3fql15i4maaajq.apps.googleusercontent.com",
           "client_type": 3
         }
