@@ -1,5 +1,6 @@
 package software.lunchtable.recky
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -31,18 +29,21 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import software.lunchtable.recky.model.Recommendation
+import androidx.compose.material3.Badge // Add this import
+import androidx.compose.material3.BadgedBox // Add this import
 
 @Composable
 fun FriendsScreen(
@@ -54,7 +55,9 @@ fun FriendsScreen(
     val auth = Firebase.auth
 
     var isEditMode by remember { mutableStateOf(false) }
-    var friends by remember { mutableStateOf<List<FriendStats>>(emptyList()) }
+    val friends = remember { mutableStateListOf<FriendStats>() }
+    var pendingRequestsCount by remember { mutableStateOf(0) }
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         val currentUser = auth.currentUser ?: return@LaunchedEffect
@@ -69,22 +72,30 @@ fun FriendsScreen(
         }
 
         // Load recommendations where fromUID is current user or any friend
-        val fromRecs = firestore.collection("recommendations")
-            .whereIn("fromUID", friendUIDs)
-            .get()
-            .await()
-            .toObjects(Recommendation::class.java)
+        val fromRecs = if (friendUIDs.isNotEmpty()) {
+            firestore.collection("recommendations")
+                .whereIn("fromUID", friendUIDs)
+                .get()
+                .await()
+                .toObjects(Recommendation::class.java)
+        } else {
+            emptyList()
+        }
 
-        val toRecs = firestore.collection("recommendations")
-            .whereIn("toUID", friendUIDs)
-            .get()
-            .await()
-            .toObjects(Recommendation::class.java)
+        val toRecs = if (friendUIDs.isNotEmpty()) {
+            firestore.collection("recommendations")
+                .whereIn("toUID", friendUIDs)
+                .get()
+                .await()
+                .toObjects(Recommendation::class.java)
+        } else {
+            emptyList()
+        }
 
         val recommendations = fromRecs + toRecs
 
         // Combine user info and recommendation stats
-        friends = friendDocs.mapNotNull { doc ->
+        val friendStatsList = friendDocs.mapNotNull { doc ->
             val friendUID = doc.id
             val username = doc.getString("username") ?: return@mapNotNull null
 
@@ -105,6 +116,23 @@ fun FriendsScreen(
                 receivedTotal = receivedTotal
             )
         }
+
+        // Replace the list contents with new data
+        friends.clear()
+        friends.addAll(friendStatsList)
+
+        // Fetch pending requests
+        val userDoc = firestore.collection("users").document(currentUID).get().await()
+        val requestUIDs = userDoc.get("friendRequests") as? List<String> ?: emptyList()
+        val requestDocs = requestUIDs.mapNotNull { uid ->
+            val doc = firestore.collection("users").document(uid).get().await()
+            val username = doc.getString("username")
+            if (username != null) FriendRequest(uid, username) else null
+        }
+        pendingRequestsCount = requestDocs.size
+        Log.d("FriendsScreen", "Fetched pendingRequestsCount: $pendingRequestsCount")
+
+        isLoading = false
     }
 
     Column(modifier = Modifier
@@ -124,8 +152,24 @@ fun FriendsScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(onClick = onRequestsClick) {
-                Text("Requests")
+                Box {
+                    Text(
+                        text = "Requests",
+                        modifier = Modifier.align(Alignment.Center) // Or other alignment
+                    )
+                    if (pendingRequestsCount > 0) {
+                        Badge(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd) // Default BadgedBox position
+                                .padding(top = 0.dp, end = 0.dp) // Adjust these to shift
+                            //  .offset(x = 4.dp, y = (-2).dp) // Or use offset for finer control
+                        ) {
+                            Text("$pendingRequestsCount")
+                        }
+                    }
+                }
             }
+
             Button(onClick = onAddFriendClick) {
                 Text("Add Friend")
             }
@@ -133,21 +177,39 @@ fun FriendsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (friends.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+        when {
+            isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
-            LazyColumn {
-                items(friends) { friend ->
-                    FriendCard(
-                        friend = friend,
-                        isEditMode = isEditMode,
-                        onDelete = {
-                            println("Delete ${friend.username}")
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+
+            friends.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No friends yet")
+                }
+            }
+
+            else -> {
+                LazyColumn {
+                    items(friends) { friend ->
+                        FriendCard(
+                            friend = friend,
+                            isEditMode = isEditMode,
+                            onDelete = {
+                                val currentUser = Firebase.auth.currentUser
+                                val uid = currentUser?.uid
+                                if (uid != null) {
+                                    Firebase.firestore.collection("users").document(uid)
+                                        .update("friends", FieldValue.arrayRemove(friend.uid))
+                                        .addOnSuccessListener {
+                                            friends.remove(friend)
+                                        }
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
             }
         }
