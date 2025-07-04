@@ -25,7 +25,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(WindowInsets.systemBars.asPaddingValues()) // 👈 Add this line
+            .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
         HomeHeader(userEmail = email, onProfileClick = onProfileClick)
 

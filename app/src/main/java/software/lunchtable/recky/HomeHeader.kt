@@ -2,11 +2,19 @@ package software.lunchtable.recky
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,33 +23,35 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeHeader(userEmail: String, onProfileClick: () -> Unit) {
+fun HomeHeader(
+    userEmail: String,
+    onProfileClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Logo (left)
         Image(
             painter = painterResource(id = R.drawable.recky_logo),
             contentDescription = "Recky Logo",
             modifier = Modifier.size(40.dp)
         )
 
-        // Spacer between logo and text
         Spacer(modifier = Modifier.weight(1f))
 
-        // Welcome text (center)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Welcome back,", style = MaterialTheme.typography.bodyMedium)
-            Text(text = userEmail, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = userEmail,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
-        // Spacer between text and icon
         Spacer(modifier = Modifier.weight(1f))
 
-        // Profile icon (right)
         IconButton(onClick = onProfileClick) {
             Icon(
                 imageVector = Icons.Default.Person,
@@ -52,6 +62,5 @@ fun HomeHeader(userEmail: String, onProfileClick: () -> Unit) {
                     .padding(4.dp)
             )
         }
-
     }
 }
