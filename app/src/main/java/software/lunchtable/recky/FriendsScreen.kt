@@ -192,11 +192,24 @@ fun FriendsScreen(
                                 val currentUser = Firebase.auth.currentUser
                                 val uid = currentUser?.uid
                                 if (uid != null) {
-                                    Firebase.firestore.collection("users").document(uid)
-                                        .update("friends", FieldValue.arrayRemove(friend.uid))
-                                        .addOnSuccessListener {
-                                            friends.remove(friend)
-                                        }
+                                    val db = Firebase.firestore
+                                    val batch = db.batch()
+
+                                    val currentUserRef = db.collection("users").document(uid)
+                                    val friendRef = db.collection("users").document(friend.uid)
+
+                                    batch.update(
+                                        currentUserRef,
+                                        "friends",
+                                        FieldValue.arrayRemove(friend.uid)
+                                    )
+                                    batch.update(friendRef, "friends", FieldValue.arrayRemove(uid))
+
+                                    batch.commit().addOnSuccessListener {
+                                        friends.remove(friend)
+                                    }.addOnFailureListener {
+                                        Log.w("RemoveFriend", "Failed to remove friend", it)
+                                    }
                                 }
                             }
                         )
