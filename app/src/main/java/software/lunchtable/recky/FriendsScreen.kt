@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -121,23 +122,15 @@ fun FriendsScreen(
         friends.clear()
         friends.addAll(friendStatsList)
 
-        // Fetch pending requests
-        val userDoc = firestore.collection("users").document(currentUID).get().await()
-        val requestUIDs = userDoc.get("friendRequests") as? List<String> ?: emptyList()
-        val requestDocs = requestUIDs.mapNotNull { uid ->
-            val doc = firestore.collection("users").document(uid).get().await()
-            val username = doc.getString("username")
-            if (username != null) FriendRequest(uid, username) else null
-        }
-        pendingRequestsCount = requestDocs.size
-        Log.d("FriendsScreen", "Fetched pendingRequestsCount: $pendingRequestsCount")
-
+        pendingRequestsCount = getPendingFriendRequestsCount()
         isLoading = false
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
 
         FriendsTopBar(
             onBack = onBack,
@@ -155,14 +148,13 @@ fun FriendsScreen(
                 Box {
                     Text(
                         text = "Requests",
-                        modifier = Modifier.align(Alignment.Center) // Or other alignment
+                        modifier = Modifier.align(Alignment.Center)
                     )
                     if (pendingRequestsCount > 0) {
                         Badge(
                             modifier = Modifier
-                                .align(Alignment.TopEnd) // Default BadgedBox position
-                                .padding(top = 0.dp, end = 0.dp) // Adjust these to shift
-                            //  .offset(x = 4.dp, y = (-2).dp) // Or use offset for finer control
+                                .align(Alignment.TopEnd)
+                                .offset(x = 18.dp, y = (-2).dp)
                         ) {
                             Text("$pendingRequestsCount")
                         }

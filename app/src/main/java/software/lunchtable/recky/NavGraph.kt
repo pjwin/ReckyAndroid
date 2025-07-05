@@ -70,11 +70,19 @@ fun ReckyNavGraph(
                 onBack = { navController.popBackStack() },
                 onRequestsClick = {
                     navController.navigate("friend_requests")
+                },
+                onAddFriendClick = {
+                    navController.navigate("addFriend")
                 }
             )
         }
         composable("friend_requests") {
             FriendRequestsScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("addFriend") {
+            AddFriendScreen(
                 onBack = { navController.popBackStack() }
             )
         }
