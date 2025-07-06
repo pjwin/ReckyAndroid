@@ -45,7 +45,9 @@ fun ReckyNavGraph(
             HomeScreen(
                 onProfileClick = {
                     navController.navigate("profile")
-                }
+                },
+                onRecommendationClick = { /* TODO: implement navigation to detail */ },
+                onRecommendSomething = { /* TODO: implement navigation to send screen */ }
             )
         }
         composable("profile") {
