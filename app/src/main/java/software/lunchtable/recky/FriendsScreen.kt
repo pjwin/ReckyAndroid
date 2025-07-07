@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,9 +43,6 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
-import software.lunchtable.recky.model.Recommendation
-import androidx.compose.material3.Badge // Add this import
-import androidx.compose.material3.BadgedBox // Add this import
 
 @Composable
 fun FriendsScreen(

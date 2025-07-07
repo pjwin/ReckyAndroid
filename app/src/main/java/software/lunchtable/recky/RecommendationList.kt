@@ -15,13 +15,11 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import software.lunchtable.recky.model.Recommendation
 
 @Composable
 fun RecommendationList(
-    onCardClick: (String) -> Unit
+    onRecommendationClick: (String) -> Unit,
 ) {
-    val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val currentUID = auth.currentUser?.uid ?: return
 
@@ -86,7 +84,7 @@ fun RecommendationList(
                             currentUserId = currentUID,
                             fromUsername = from,
                             toUsername = to,
-                            onClick = { onCardClick("${rec.fromUID}_${rec.toUID}_${rec.title}") }
+                            onClick = { onRecommendationClick(rec.id) }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                     }
@@ -110,7 +108,7 @@ suspend fun loadRecommendations(currentUID: String): List<Recommendation> {
         .await()
 
     return (fromRecs.documents + toRecs.documents)
-        .mapNotNull { it.toObject(Recommendation::class.java) }
+        .mapNotNull { it.toObject(Recommendation::class.java)?.copy(id = it.id) }
         .distinct() // Optional: avoid duplicates
         .sortedByDescending { it.timestamp?.toDate()?.time ?: 0L }
 }

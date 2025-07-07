@@ -23,7 +23,10 @@ fun HomeScreen(
                 .padding(WindowInsets.systemBars.asPaddingValues())
                 .padding(bottom = 80.dp)
         ) {
-            HomeHeader(userEmail = email, onProfileClick = onProfileClick)
+            HomeHeader(
+                userEmail = email,
+                onProfileClick = onProfileClick
+            )
 
             Divider(
                 thickness = 1.dp,
@@ -32,7 +35,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             RecommendationList(
-                onCardClick = onRecommendationClick
+                onRecommendationClick = onRecommendationClick
             )
         }
 

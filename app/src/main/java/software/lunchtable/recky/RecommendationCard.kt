@@ -1,10 +1,12 @@
 package software.lunchtable.recky
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -14,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import software.lunchtable.recky.model.Recommendation
 
 @Composable
 fun RecommendationCard(
@@ -27,7 +28,7 @@ fun RecommendationCard(
     val voteIcon = when (recommendation.vote) {
         true -> "👍"
         false -> "👎"
-        null -> ""
+        null -> null
     }
 
     val isSentByUser = recommendation.fromUID == currentUserId
@@ -49,12 +50,18 @@ fun RecommendationCard(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (voteIcon.isNotEmpty()) {
-                Text(
-                    voteIcon,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(end = 12.dp)
-                )
+            // Reserve space for vote icon
+            Box(modifier = Modifier
+                .width(36.dp)
+                .padding(end = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                voteIcon?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             }
 
             Column(modifier = Modifier.weight(1f)) {

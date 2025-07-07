@@ -1,8 +1,9 @@
-package software.lunchtable.recky.model
+package software.lunchtable.recky
 
 import com.google.firebase.Timestamp
 
 data class Recommendation(
+    val id: String = "",
     val fromUID: String = "",
     val toUID: String = "",
     val title: String = "",
